@@ -19,6 +19,7 @@ using Test
         @test D[1,100] == typemax(T)
         @test D[1,20] == a
         @test D[40,2] == b
+        @test sum(D .!== typemax(T)) == 2
         @test D != D'
         @test symmetrize!(D) == D'
 
@@ -34,8 +35,14 @@ using Test
         @test D[1,100] == ndval
         @test D[1,20] == a
         @test D[40,2] == b
+        @test sum(D .!== ndval) == 2
         @test D != D'
         @test symmetrize!(D) == D'
+
+        # check double entry
+        D[40,2] = a
+        @test D[40,2] == a
+        @test length(D.rowindices) == length(D.colindices) == length(D.ndval) == 4
     end
 
 end
