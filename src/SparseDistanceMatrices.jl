@@ -23,10 +23,15 @@ function Base.getindex(D::SparseDistanceMatrix{T}, i::Integer, j::Integer) where
     return D.ndval[index]
 end
 function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer) where T
-    push!(D.rowindices, i)
-    push!(D.colindices, j)
-    push!(D.ndval, v)
-    D
+    index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
+    if index === nothing
+        push!(D.rowindices, i)
+        push!(D.colindices, j)
+        push!(D.ndval, v)
+    else
+        D.ndval[index] = v
+    end
+    v
 end
 
 function symmetrize!(D::SparseDistanceMatrix{T}) where T
