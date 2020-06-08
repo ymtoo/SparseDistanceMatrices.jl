@@ -18,11 +18,9 @@ SparseDistanceMatrix(n::Int, colindices::Vector{Int}, rowindices::Vector{Int},
 
 Base.size(D::SparseDistanceMatrix) = (D.n, D.n)
 function Base.getindex(D::SparseDistanceMatrix{T}, i::Integer, j::Integer) where T
-    index = findall(x->x==1, (i .== D.rowindices) .& (j .== D.colindices))
-    if length(index) == 1
-        return D.ndval[index[1]]
-    end
-    D.defaultval
+    index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
+    index === nothing && return D.defaultval
+    return D.ndval[index]
 end
 function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer) where T
     push!(D.rowindices, i)
@@ -36,8 +34,8 @@ function symmetrize!(D::SparseDistanceMatrix{T}) where T
     colindicestmp = Int[]
     ndvaltmp = T[]
     for (i, j, v) in zip(D.rowindices, D.colindices, D.ndval)
-        index = findall(x->x==1, (j .== D.rowindices) .& (i .== D.colindices))
-        if length(index) == 0
+        index = findfirst((j .== D.rowindices) .& (i .== D.colindices))
+        if index === nothing
             push!(rowindicestmp, j)
             push!(colindicestmp, i)
             push!(ndvaltmp, v)
