@@ -18,11 +18,9 @@ SparseDistanceMatrix(n::Int, colindices::Vector{Int}, rowindices::Vector{Int},
 
 Base.size(D::SparseDistanceMatrix) = (D.n, D.n)
 function Base.getindex(D::SparseDistanceMatrix{T}, i::Integer, j::Integer) where T
-    index = findall((i .== D.rowindices) .& (j .== D.colindices))
-    if length(index) == 1
-        return D.ndval[index[1]]
-    end
-    D.defaultval
+    index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
+    index === nothing && return D.defaultval
+    return D.ndval[index]
 end
 function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer) where T
     push!(D.rowindices, i)
