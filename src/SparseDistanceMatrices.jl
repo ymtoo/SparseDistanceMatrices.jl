@@ -34,8 +34,8 @@ function symmetrize!(D::SparseDistanceMatrix{T}) where T
     colindicestmp = Int[]
     ndvaltmp = T[]
     for (i, j, v) in zip(D.rowindices, D.colindices, D.ndval)
-        index = findall((j .== D.rowindices) .& (i .== D.colindices))
-        if length(index) == 0
+        index = findfirst((j .== D.rowindices) .& (i .== D.colindices))
+        if index === nothing
             push!(rowindicestmp, j)
             push!(colindicestmp, i)
             push!(ndvaltmp, v)
