@@ -18,11 +18,15 @@ SparseDistanceMatrix(n::Int, colindices::Vector{Int}, rowindices::Vector{Int},
 
 Base.size(D::SparseDistanceMatrix) = (D.n, D.n)
 function Base.getindex(D::SparseDistanceMatrix{T}, i::Integer, j::Integer) where T
+    i == j && return T(0.0)
     index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
     index === nothing && return D.defaultval
     return D.ndval[index]
 end
 function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer) where T
+    if i == j
+        v == T(0.0) ? (return v) : throw(ArgumentError("Diagonol element of a distance matrix has to be $(T(0.0))"))
+    end
     index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
     if index === nothing
         push!(D.rowindices, i)

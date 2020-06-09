@@ -15,11 +15,11 @@ using Test
         D[40,2] = b
 
         @test size(D) == (100, 100)
-        [@test D[i,i] == typemax(T) for i in 1:N]
+        [@test D[i,i] == T(0.0) for i in 1:N]
         @test D[1,100] == typemax(T)
         @test D[1,20] == a
         @test D[40,2] == b
-        @test sum(D .!== typemax(T)) == 2
+        @test sum(D .!== typemax(T)) == 2+N
         @test D != D'
         @test symmetrize!(D) == D'
 
@@ -31,11 +31,11 @@ using Test
         D[40,2] = b
 
         @test size(D) == (100, 100)
-        [@test D[i,i] == ndval for i in 1:N]
+        [@test D[i,i] == T(0.0) for i in 1:N]
         @test D[1,100] == ndval
         @test D[1,20] == a
         @test D[40,2] == b
-        @test sum(D .!== ndval) == 2
+        @test sum(D .!== ndval) == 2+N
         @test D != D'
         @test symmetrize!(D) == D'
 
@@ -43,6 +43,8 @@ using Test
         D[40,2] = a
         @test D[40,2] == a
         @test length(D.rowindices) == length(D.colindices) == length(D.ndval) == 4
+
+        @test_throws ArgumentError D[1,1] = T <: Integer ? trunc(T, 10.0) : T(10.0)
     end
 
 end
