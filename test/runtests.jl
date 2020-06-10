@@ -54,13 +54,13 @@ end
     Ts = [Int16, Int32, Int64, Float16, Float32, Float64]
     for T in Ts
         D = SparseDistanceMatrix(1_000_000, Int[], Int[], T[])
-        a = T <: Integer ? trunc(T, 10.0) : T(10.0)
-        D[1,2] = a
+        av = T <: Integer ? trunc.(T, randn(9_999)) : T.(randn(9_999))
+        [D[1,i+1] = av[i] for i in 1:9_999]
 
         t = @belapsed $D'
         @test t < 0.001
 
         @test D'[1,2] == typemax(T)
-        @test D'[2,1] == a
+        @test D'[2,1] == av[1]
     end
 end

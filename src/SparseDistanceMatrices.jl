@@ -1,5 +1,7 @@
 module SparseDistanceMatrices
 
+using LinearAlgebra
+
 export SparseDistanceMatrix, symmetrize!
 
 struct SparseDistanceMatrix{T} <: AbstractMatrix{T}
@@ -38,7 +40,10 @@ function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer
     v
 end
 
-Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D.colindices, D.rowindices, D.ndval, D.defaultval)
+Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D.rowindices, D.colindices, D.ndval, D.defaultval)
+function LinearAlgebra.adjoint(D::SparseDistanceMatrix{T}) where T
+    T <: Complex ? SparseDistanceMatrix(D.n, D.rowindices, D.colindices, conj.(D.ndval), conj(D.defaultval)) : SparseDistanceMatrix(D.n, D.rowindices, D.colindices, D.ndval, D.defaultval)
+end
 
 function symmetrize!(D::SparseDistanceMatrix{T}) where T
     rowindicestmp = Int[]
