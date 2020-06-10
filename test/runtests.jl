@@ -60,6 +60,8 @@ end
         t = @belapsed $D'
         @test t < 0.001
 
+        @test transpose(D)[1,2] == typemax(T)
+        @test transpose(D)[2,1] == av[1]
         @test D'[1,2] == typemax(T)
         @test D'[2,1] == av[1]
     end
