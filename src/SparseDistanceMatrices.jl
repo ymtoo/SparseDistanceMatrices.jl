@@ -38,7 +38,7 @@ function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer
     v
 end
 
-Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D.colindices, D.rowindices, T[], D.defaultval)
+Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D.colindices, D.rowindices, D.ndval, D.defaultval)
 
 function symmetrize!(D::SparseDistanceMatrix{T}) where T
     rowindicestmp = Int[]
