@@ -1,4 +1,4 @@
-using SparseDistanceMatrices
+using SparseDistanceMatrices, BenchmarkTools
 
 using Test
 
@@ -47,4 +47,20 @@ using Test
         @test_throws ArgumentError D[1,1] = T <: Integer ? trunc(T, 10.0) : T(10.0)
     end
 
+end
+
+@testset "Benchmark" begin
+
+    Ts = [Int16, Int32, Int64, Float16, Float32, Float64]
+    for T in Ts
+        D = SparseDistanceMatrix(1_000_000, Int[], Int[], T[])
+        a = T <: Integer ? trunc(T, 10.0) : T(10.0)
+        D[1,2] = a
+
+        t = @belapsed $D'
+        @test t < 0.001
+
+        @test D'[1,2] == typemax(T)
+        @test D'[2,1] == a
+    end
 end
