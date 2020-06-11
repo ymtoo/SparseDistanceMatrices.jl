@@ -22,6 +22,7 @@ using Test
         @test sum(D .!== typemax(T)) == 2+N
         @test D != D'
         @test symmetrize!(D) == D'
+        @test countnt(D) == 4
 
         ndval = T <: Integer ? trunc(T, 1000.0) : T(1000.0)
         D = SparseDistanceMatrix(N, Int[], Int[], T[], ndval)
@@ -38,11 +39,13 @@ using Test
         @test sum(D .!== ndval) == 2+N
         @test D != D'
         @test symmetrize!(D) == D'
+        @test countnt(D) == 4
 
         # check double entry
         D[40,2] = a
         @test D[40,2] == a
         @test length(D.rowindices) == length(D.colindices) == length(D.ndval) == 4
+        @test countnt(D) == 4
 
         @test_throws ArgumentError D[1,1] = T <: Integer ? trunc(T, 10.0) : T(10.0)
     end

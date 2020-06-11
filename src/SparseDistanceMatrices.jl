@@ -2,7 +2,7 @@ module SparseDistanceMatrices
 
 using LinearAlgebra
 
-export SparseDistanceMatrix, symmetrize!
+export SparseDistanceMatrix, countnt, symmetrize!
 
 struct SparseDistanceMatrix{T} <: AbstractMatrix{T}
     n::Int
@@ -44,6 +44,11 @@ Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D
 function LinearAlgebra.adjoint(D::SparseDistanceMatrix{T}) where T
     T <: Complex ? SparseDistanceMatrix(D.n, D.rowindices, D.colindices, conj.(D.ndval), conj(D.defaultval)) : SparseDistanceMatrix(D.n, D.rowindices, D.colindices, D.ndval, D.defaultval)
 end
+
+"""
+Count the number of non-trivial elements.
+"""
+countnt(D::SparseDistanceMatrix{T}) where T = length(D.ndval)
 
 function symmetrize!(D::SparseDistanceMatrix{T}) where T
     rowindicestmp = Int[]
