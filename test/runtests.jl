@@ -9,6 +9,7 @@ using Test
 
     for T in Ts
         D = SparseDistanceMatrix(N, Int[], Int[], T[])
+        @test D == SparseDistanceMatrix(N, T)
         a = T <: Integer ? trunc(T, 10.0) : T(10.0)
         b = T <: Integer ? trunc(T, 12.3) : T(12.3)
         D[1,20] = a
@@ -26,6 +27,7 @@ using Test
 
         ndval = T <: Integer ? trunc(T, 1000.0) : T(1000.0)
         D = SparseDistanceMatrix(N, Int[], Int[], T[], ndval)
+        @test D == SparseDistanceMatrix(N, ndval)
         a = T <: Integer ? trunc(T, 10.0) : T(10.0)
         b = T <: Integer ? trunc(T, 12.3) : T(12.3)
         D[1,20] = a

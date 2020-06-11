@@ -17,6 +17,8 @@ SparseDistanceMatrix(n::Int, colindices::Vector{Int}, rowindices::Vector{Int},
                                                                       rowindices,
                                                                       ndval,
                                                                       typemax(eltype(ndval)))
+SparseDistanceMatrix(n::Int, T::DataType) = SparseDistanceMatrix(n, Int[], Int[], T[])
+SparseDistanceMatrix(n::Int, defaultval::T) where T = SparseDistanceMatrix(n, Int[], Int[], T[], defaultval)
 
 Base.size(D::SparseDistanceMatrix) = (D.n, D.n)
 function Base.getindex(D::SparseDistanceMatrix{T}, i::Integer, j::Integer) where T
