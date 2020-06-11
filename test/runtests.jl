@@ -16,7 +16,7 @@ using Test
         D[40,2] = b
 
         @test size(D) == (100, 100)
-        [@test D[i,i] == T(0.0) for i in 1:N]
+        [@test D[i,i] == zero(T) for i in 1:N]
         @test D[1,100] == typemax(T)
         @test D[1,20] == a
         @test D[40,2] == b
@@ -26,7 +26,7 @@ using Test
         @test countnt(D) == 4
 
         am = adjacency_matrix(D)
-        @test am[10,11] == am[50,51] == am[90,91] == T(0.0)
+        @test am[10,11] == am[50,51] == am[90,91] == zero(T)
 
         ndval = T <: Integer ? trunc(T, 1000.0) : T(1000.0)
         D = SparseDistanceMatrix(N, Int[], Int[], T[], ndval)
@@ -37,7 +37,7 @@ using Test
         D[40,2] = b
 
         @test size(D) == (100, 100)
-        [@test D[i,i] == T(0.0) for i in 1:N]
+        [@test D[i,i] == zero(T) for i in 1:N]
         @test D[1,100] == ndval
         @test D[1,20] == a
         @test D[40,2] == b
@@ -47,7 +47,7 @@ using Test
         @test countnt(D) == 4
 
         am = adjacency_matrix(D)
-        @test am[10,11] == am[50,51] == am[90,91] == T(0.0)
+        @test am[10,11] == am[50,51] == am[90,91] == zero(T)
 
         # check double entry
         D[40,2] = a

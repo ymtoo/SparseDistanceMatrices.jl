@@ -29,7 +29,7 @@ function Base.getindex(D::SparseDistanceMatrix{T}, i::Integer, j::Integer) where
 end
 function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer) where T
     if i == j
-        v == T(0.0) ? (return v) : throw(ArgumentError("Diagonol element of a distance matrix has to be $(T(0.0))"))
+        v == zero(T) ? (return v) : throw(ArgumentError("Diagonol element of a distance matrix has to be $(zero(T))"))
     end
     index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
     if index === nothing
@@ -71,7 +71,7 @@ function symmetrize!(D::SparseDistanceMatrix{T}) where T
 end
 
 function adjacency_matrix(D::SparseDistanceMatrix{T}) where T
-     SparseDistanceMatrix(copy(D.n), copy(D.colindices), copy(D.rowindices), copy(D.ndval), T(0.0))
+     SparseDistanceMatrix(copy(D.n), copy(D.colindices), copy(D.rowindices), copy(D.ndval), zero(T))
 end
 
 
