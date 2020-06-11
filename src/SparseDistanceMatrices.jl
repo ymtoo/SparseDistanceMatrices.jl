@@ -2,7 +2,7 @@ module SparseDistanceMatrices
 
 using LinearAlgebra
 
-export SparseDistanceMatrix, countnt, symmetrize!
+export SparseDistanceMatrix, countnt, symmetrize!, adjacency_matrix
 
 struct SparseDistanceMatrix{T} <: AbstractMatrix{T}
     n::Int
@@ -69,5 +69,10 @@ function symmetrize!(D::SparseDistanceMatrix{T}) where T
     append!(D.ndval, ndvaltmp)
     D
 end
+
+function adjacency_matrix(D::SparseDistanceMatrix{T}) where T
+     SparseDistanceMatrix(copy(D.n), copy(D.colindices), copy(D.rowindices), copy(D.ndval), T(0.0))
+end
+
 
 end # module

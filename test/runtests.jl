@@ -25,6 +25,9 @@ using Test
         @test symmetrize!(D) == D'
         @test countnt(D) == 4
 
+        am = adjacency_matrix(D)
+        @test am[10,11] == am[50,51] == am[90,91] == T(0.0)
+
         ndval = T <: Integer ? trunc(T, 1000.0) : T(1000.0)
         D = SparseDistanceMatrix(N, Int[], Int[], T[], ndval)
         @test D == SparseDistanceMatrix(N, ndval)
@@ -42,6 +45,9 @@ using Test
         @test D != D'
         @test symmetrize!(D) == D'
         @test countnt(D) == 4
+
+        am = adjacency_matrix(D)
+        @test am[10,11] == am[50,51] == am[90,91] == T(0.0)
 
         # check double entry
         D[40,2] = a
