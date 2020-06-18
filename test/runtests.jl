@@ -1,4 +1,4 @@
-using SparseDistanceMatrices, BenchmarkTools
+using Distances, SparseDistanceMatrices, BenchmarkTools
 
 using Test
 
@@ -58,6 +58,31 @@ using Test
         @test_throws ArgumentError D[1,1] = T <: Integer ? trunc(T, 10.0) : T(10.0)
     end
 
+end
+
+@testset "Pairwise" begin
+    X = [0 0 1 1 1;
+         1 0 1 0 1;
+         0 1 1 1 1;
+         0 0 1 1 0]
+    D1 = pairwise(Euclidean(), X, 4; dims=2)
+    @test D1 == [0.0 Inf Inf Inf Inf;
+                 Inf 0.0 Inf Inf Inf;
+                 Inf Inf 0.0 1.0 1.0;
+                 Inf Inf 1.0 0.0 Inf;
+                 Inf Inf 1.0 Inf 0.0]
+    D2 = pairwise(Euclidean(), X, 1; dims=2)
+    @test D2 == [0.0 Inf Inf Inf Inf;
+                 Inf 0.0 Inf Inf Inf;
+                 Inf Inf 0.0 1.0 Inf;
+                 Inf Inf Inf 0.0 Inf;
+                 Inf Inf Inf Inf 0.0]
+    D3 = pairwise(Euclidean(), X, 2; dims=2)
+    @test D3 == [0.0 Inf Inf Inf Inf;
+                 Inf 0.0 Inf Inf Inf;
+                 Inf Inf 0.0 1.0 1.0;
+                 Inf Inf Inf 0.0 Inf;
+                 Inf Inf Inf Inf 0.0]
 end
 
 @testset "Benchmark" begin

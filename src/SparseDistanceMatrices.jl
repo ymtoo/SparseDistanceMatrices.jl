@@ -1,8 +1,10 @@
 module SparseDistanceMatrices
 
-using LinearAlgebra
+using Distances, LinearAlgebra
 
-export SparseDistanceMatrix, countnt, symmetrize!, adjacency_matrix
+import Distances: deprecated_dims, result_type
+
+export SparseDistanceMatrix, countnt, symmetrize!, adjacency_matrix, pairwise
 
 struct SparseDistanceMatrix{T} <: AbstractMatrix{T}
     n::Int
@@ -17,7 +19,7 @@ SparseDistanceMatrix(n::Int, colindices::Vector{Int}, rowindices::Vector{Int},
                                                                       rowindices,
                                                                       ndval,
                                                                       typemax(eltype(ndval)))
-SparseDistanceMatrix(n::Int, T::DataType) = SparseDistanceMatrix(n, Int[], Int[], T[])
+SparseDistanceMatrix(n::Int, T::Type) = SparseDistanceMatrix(n, Int[], Int[], T[])
 SparseDistanceMatrix(n::Int, defaultval::T) where T = SparseDistanceMatrix(n, Int[], Int[], T[], defaultval)
 
 Base.size(D::SparseDistanceMatrix) = (D.n, D.n)
@@ -72,6 +74,43 @@ end
 
 function adjacency_matrix(D::SparseDistanceMatrix{T}) where T
      SparseDistanceMatrix(copy(D.n), copy(D.colindices), copy(D.rowindices), copy(D.ndval), zero(T))
+end
+
+function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMatrix, k::Int; map::Function=map, showprogress::Bool=true) where T
+    n = size(a, 2)
+    maxndval = typemax(T)
+    for i in 1:n
+        d = map(j -> metric(view(a, :, i), view(a, :, j)), 1:n)
+        d[i] = typemax(T)
+        fillindices = findall(d .< maxndval)
+        if fillindices !== nothing
+            append!(D.rowindices, fill(i, length(fillindices)))
+            append!(D.colindices, fillindices)
+            append!(D.ndval, d[fillindices])
+                end
+        if countnt(D) > k
+            ind = partialsortperm(D.ndval, 1:k)
+            discardindices = [discardindex for discardindex in 1:length(D.ndval) if discardindex ∉ ind]
+            deleteat!(D.rowindices, discardindices)
+            deleteat!(D.colindices, discardindices)
+            deleteat!(D.ndval, discardindices)
+        end
+        maxndval = maximum(D.ndval)
+    end
+    D
+end
+
+function Distances.pairwise(metric::PreMetric, a::AbstractMatrix, k::Int, args...; dims::Union{Nothing,Integer}=nothing, map::Function=map, showprogress::Bool=true)
+    dims = deprecated_dims(dims)
+    dims in (1, 2) || throw(ArgumentError("dims should be 1 or 2 (got $dims)"))
+    n = size(a, dims)
+    T = result_type(metric, a, a)
+    D = SparseDistanceMatrix(n, T)
+    if dims == 1
+        _pairwise!(D, metric, transpose(a), k)
+    else
+        _pairwise!(D, metric, a, k)
+    end
 end
 
 
