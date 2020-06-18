@@ -76,9 +76,10 @@ function adjacency_matrix(D::SparseDistanceMatrix{T}) where T
      SparseDistanceMatrix(copy(D.n), copy(D.colindices), copy(D.rowindices), copy(D.ndval), zero(T))
 end
 
-function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMatrix, k::Int; map::Function=map, showprogress::Bool=true) where T
+function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMatrix, k::Int; map::Function=map, showprogress::Bool=false) where T
     n = size(a, 2)
     maxndval = typemax(T)
+    showprogress && (p = Progress(n, 1, "Pairwise distance matrix..."))
     for i in 1:n
         d = map(j -> metric(view(a, :, i), view(a, :, j)), 1:n)
         d[i] = typemax(T)
@@ -96,6 +97,7 @@ function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMa
             deleteat!(D.ndval, discardindices)
         end
         maxndval = maximum(D.ndval)
+        showprogress && next!(p)
     end
     D
 end
