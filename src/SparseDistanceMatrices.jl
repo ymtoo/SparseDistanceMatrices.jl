@@ -79,16 +79,17 @@ end
 function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMatrix, k::Int; map::Function=map, showprogress::Bool=false) where T
     n = size(a, 2)
     maxndval = typemax(T)
+    oneton = 1:n
     showprogress && (p = Progress(n, 1, "Pairwise distance matrix..."))
     for i in 1:n
         d = map(j -> metric(view(a, :, i), view(a, :, j)), 1:n)
         d[i] = typemax(T)
-        fillindices = findall(d .< maxndval)
-        if fillindices !== nothing
-            append!(D.rowindices, fill(i, length(fillindices)))
-            append!(D.colindices, fillindices)
-            append!(D.ndval, d[fillindices])
-                end
+        fillbindices = d .< maxndval
+        if any(fillbindices)
+            append!(D.rowindices, fill(i, sum(fillbindices)))
+            append!(D.colindices, oneton[fillbindices])
+            append!(D.ndval, d[fillbindices])
+        end
         if countnt(D) > k
             ind = partialsortperm(D.ndval, 1:k)
             discardindices = [discardindex for discardindex in 1:length(D.ndval) if discardindex ∉ ind]
