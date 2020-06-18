@@ -102,16 +102,16 @@ function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMa
     D
 end
 
-function Distances.pairwise(metric::PreMetric, a::AbstractMatrix, k::Int, args...; dims::Union{Nothing,Integer}=nothing, map::Function=map, showprogress::Bool=true)
+function Distances.pairwise(metric::PreMetric, a::AbstractMatrix, k::Int, args...; dims::Union{Nothing,Integer}=nothing, map::Function=map, showprogress::Bool=false)
     dims = deprecated_dims(dims)
     dims in (1, 2) || throw(ArgumentError("dims should be 1 or 2 (got $dims)"))
     n = size(a, dims)
     T = result_type(metric, a, a)
     D = SparseDistanceMatrix(n, T)
     if dims == 1
-        _pairwise!(D, metric, transpose(a), k)
+        _pairwise!(D, metric, transpose(a), k; map=map, showprogress=showprogress)
     else
-        _pairwise!(D, metric, a, k)
+        _pairwise!(D, metric, a, k; map=map, showprogress=showprogress)
     end
 end
 
