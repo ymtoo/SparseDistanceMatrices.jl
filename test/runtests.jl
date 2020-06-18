@@ -66,23 +66,26 @@ end
          0 1 1 1 1;
          0 0 1 1 0]
     D1 = pairwise(Euclidean(), X, 4; dims=2)
-    @test D1 == [0.0 Inf Inf Inf Inf;
-                 Inf 0.0 Inf Inf Inf;
-                 Inf Inf 0.0 1.0 1.0;
-                 Inf Inf 1.0 0.0 Inf;
-                 Inf Inf 1.0 Inf 0.0]
+    Dt1 = pairwise(Euclidean(), transpose(X), 4; dims=1)
+    @test D1 == Dt1 == [0.0 Inf Inf Inf Inf;
+                        Inf 0.0 Inf Inf Inf;
+                        Inf Inf 0.0 1.0 1.0;
+                        Inf Inf 1.0 0.0 Inf;
+                        Inf Inf 1.0 Inf 0.0]
     D2 = pairwise(Euclidean(), X, 1; dims=2)
-    @test D2 == [0.0 Inf Inf Inf Inf;
-                 Inf 0.0 Inf Inf Inf;
-                 Inf Inf 0.0 1.0 Inf;
-                 Inf Inf Inf 0.0 Inf;
-                 Inf Inf Inf Inf 0.0]
+    Dt2 = pairwise(Euclidean(), transpose(X), 1; dims=1)
+    @test D2 == Dt2 == [0.0 Inf Inf Inf Inf;
+                        Inf 0.0 Inf Inf Inf;
+                        Inf Inf 0.0 1.0 Inf;
+                        Inf Inf Inf 0.0 Inf;
+                        Inf Inf Inf Inf 0.0]
     D3 = pairwise(Euclidean(), X, 2; dims=2)
-    @test D3 == [0.0 Inf Inf Inf Inf;
-                 Inf 0.0 Inf Inf Inf;
-                 Inf Inf 0.0 1.0 1.0;
-                 Inf Inf Inf 0.0 Inf;
-                 Inf Inf Inf Inf 0.0]
+    Dt3 = pairwise(Euclidean(), transpose(X), 2; dims=1)
+    @test D3 == Dt3 == [0.0 Inf Inf Inf Inf;
+                        Inf 0.0 Inf Inf Inf;
+                        Inf Inf 0.0 1.0 1.0;
+                        Inf Inf Inf 0.0 Inf;
+                        Inf Inf Inf Inf 0.0]
 end
 
 @testset "Benchmark" begin
