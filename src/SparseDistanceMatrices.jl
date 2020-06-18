@@ -1,6 +1,6 @@
 module SparseDistanceMatrices
 
-using Distances, LinearAlgebra
+using Distances, LinearAlgebra, ProgressMeter
 
 import Distances: deprecated_dims, result_type
 
