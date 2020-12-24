@@ -1,6 +1,6 @@
 module SparseDistanceMatrices
 
-using Distances, LinearAlgebra, ProgressMeter
+using Distances, LinearAlgebra, NearestNeighbors, ProgressMeter
 
 import Distances: deprecated_dims, result_type
 
@@ -34,7 +34,7 @@ function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer
         v == zero(T) ? (return v) : throw(ArgumentError("Diagonol element of a distance matrix has to be $(zero(T))"))
     end
     index = findfirst((i .== D.rowindices) .& (j .== D.colindices))
-    if index === nothing
+    if index  === nothing
         push!(D.rowindices, i)
         push!(D.colindices, j)
         push!(D.ndval, v)
@@ -76,7 +76,12 @@ function adjacency_matrix(D::SparseDistanceMatrix{T}) where T
      SparseDistanceMatrix(copy(D.n), copy(D.colindices), copy(D.rowindices), copy(D.ndval), zero(T))
 end
 
-function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMatrix, k::Int; map::Function=map, showprogress::Bool=false) where T
+function _pairwise!(D::SparseDistanceMatrix{T}, 
+                    metric::PreMetric, 
+                    a::AbstractMatrix, 
+                    k::Int; 
+                    map::Function=map, 
+                    showprogress::Bool=false) where T
     n = size(a, 2)
     maxndval = typemax(T)
     oneton = 1:n
@@ -103,7 +108,12 @@ function _pairwise!(D::SparseDistanceMatrix{T}, metric::PreMetric, a::AbstractMa
     D
 end
 
-function Distances.pairwise(metric::PreMetric, a::AbstractMatrix, k::Int, args...; dims::Union{Nothing,Integer}=nothing, map::Function=map, showprogress::Bool=false)
+function Distances.pairwise(metric::PreMetric, 
+                            a::AbstractMatrix, 
+                            k::Int; 
+                            dims::Union{Nothing,Integer}=nothing, 
+                            map::Function=map, 
+                            showprogress::Bool=false)
     dims = deprecated_dims(dims)
     dims in (1, 2) || throw(ArgumentError("dims should be 1 or 2 (got $dims)"))
     n = size(a, dims)
@@ -113,6 +123,36 @@ function Distances.pairwise(metric::PreMetric, a::AbstractMatrix, k::Int, args..
         _pairwise!(D, metric, transpose(a), k; map=map, showprogress=showprogress)
     else
         _pairwise!(D, metric, a, k; map=map, showprogress=showprogress)
+    end
+end
+
+function _pairwise!(D::SparseDistanceMatrix{T},
+                    tree::TT,
+                    a::AbstractMatrix,
+                    k::Int) where {T,TT<:NNTree}
+    idxs, dists = knn(tree, a, k+1)
+    for (i, (idx, dist)) ∈ enumerate(zip(idxs, dists))
+        append!(D.rowindices, repeat([i], k))
+        append!(D.colindices, idx[2:end])
+        append!(D.ndval, dist[2:end])
+    end
+    D
+end
+
+function Distances.pairwise(tree::TT, 
+                            a::AbstractMatrix, 
+                            k::Int; 
+                            dims::Union{Nothing,Integer}=nothing) where TT<:NNTree
+    dims = deprecated_dims(dims)
+    dims in (1, 2) || throw(ArgumentError("dims should be 1 or 2 (got $dims)"))
+    n = size(a, dims)
+    T = result_type(tree.metric, a, a)
+    D = SparseDistanceMatrix(n, T)
+    idxs, dists = knn(tree, a, k+1, true)
+    if dims == 1
+        _pairwise!(D, tree, transpose(a), k)
+    else
+        _pairwise!(D, tree, a, k)
     end
 end
 
