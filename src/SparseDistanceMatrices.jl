@@ -60,8 +60,6 @@ function Base.show(io::IO, ::MIME"text/plain", D::SparseDistanceMatrix{T}) where
             println("[$(D.rowindices[i]),$(D.colindices[i])] = $(D.ndval[i])")
         end
     end
-    for i ∈ 1:countnt(D)
-    end
 end
 
 Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D.rowindices, D.colindices, D.ndval, D.defaultval)
