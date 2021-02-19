@@ -1,4 +1,4 @@
-using Distances, SparseDistanceMatrices, BenchmarkTools
+using Distances, NearestNeighbors, SparseDistanceMatrices, BenchmarkTools
 
 using Test
 
@@ -86,6 +86,24 @@ end
                         Inf Inf 0.0 1.0 1.0;
                         Inf Inf Inf 0.0 Inf;
                         Inf Inf Inf Inf 0.0]
+
+    Xf = Float32.([0.1 0.1 1.0 1.0 1.0;
+                  1.0 0.1 1.0 0.1 1.0;
+                  0.1 1.0 1.0 1.0 1.0;
+                  0.1 0.1 1.0 1.0 0.2])
+    kdtree = KDTree(Xf, Euclidean())
+    D4 = pairwise(kdtree, Xf, 2; dims=2)
+    Dt4 = pairwise(kdtree, transpose(Xf), 2; dims=1)
+    @test D4 == Dt4 ≈ Float32.([0.0      Inf        1.55885  Inf        1.27671;
+                                1.27279   0.0      Inf       Inf        1.27671;
+                                Inf        1.55885   0.0       0.9      Inf;
+                                Inf        1.27279  Inf        0.0       1.20416;
+                                Inf        1.27671  Inf        1.20416   0.0])
+
+    kdtree = KDTree(Xf, Euclidean())
+    D5 = pairwise(kdtree, Xf, 4; dims=2)
+    Dt5 = pairwise(kdtree, transpose(Xf), 4; dims=1)
+    @test D5 == Dt5 == pairwise(Euclidean(), Xf; dims=2)
 end
 
 @testset "Benchmark" begin

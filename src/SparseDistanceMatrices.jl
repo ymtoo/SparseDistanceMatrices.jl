@@ -44,6 +44,26 @@ function Base.setindex!(D::SparseDistanceMatrix{T}, v::T, i::Integer, j::Integer
     v
 end
 
+function Base.show(io::IO, ::MIME"text/plain", D::SparseDistanceMatrix{T}) where T
+    println("Default value is $(D.defaultval)")
+    n = countnt(D)
+    println("$(size(D,1))x$(size(D,2)) SparseDistanceMatrix{$T} with $n stored entries:")
+    rows = displaysize(io)[1] - 2
+    if n > rows 
+        for i ∈ 1:rows-2
+            println("[$(D.rowindices[i]),$(D.colindices[i])] = $(D.ndval[i])")
+        end
+        println(io, "\u22ee")
+        print("[$(D.rowindices[end]),$(D.colindices[end])] = $(D.ndval[end])")
+    else
+        for i ∈ 1:n
+            println("[$(D.rowindices[i]),$(D.colindices[i])] = $(D.ndval[i])")
+        end
+    end
+    for i ∈ 1:countnt(D)
+    end
+end
+
 Base.transpose(D::SparseDistanceMatrix{T}) where T = SparseDistanceMatrix(D.n, D.rowindices, D.colindices, D.ndval, D.defaultval)
 function LinearAlgebra.adjoint(D::SparseDistanceMatrix{T}) where T
     T <: Complex ? SparseDistanceMatrix(D.n, D.rowindices, D.colindices, conj.(D.ndval), conj(D.defaultval)) : SparseDistanceMatrix(D.n, D.rowindices, D.colindices, D.ndval, D.defaultval)
@@ -126,11 +146,16 @@ function Distances.pairwise(metric::PreMetric,
     end
 end
 
+function _knn(tree::TT, points, k) where {TT<:NNTree}
+    idxs, dists = knn(tree, points, k+1, true)
+    [idx[2:end] for idx in idxs], [dist[2:end] for dist in dists]
+end
+
 function _pairwise!(D::SparseDistanceMatrix{T},
                     tree::TT,
                     a::AbstractMatrix,
                     k::Int) where {T,TT<:NNTree}
-    idxs, dists = knn(tree, a, k+1)
+    idxs, dists = _knn(tree, a, k+1)
     for (i, (idx, dist)) ∈ enumerate(zip(idxs, dists))
         append!(D.rowindices, repeat([i], k))
         append!(D.colindices, idx[2:end])
@@ -142,13 +167,15 @@ end
 function Distances.pairwise(tree::TT, 
                             a::AbstractMatrix, 
                             k::Int; 
-                            dims::Union{Nothing,Integer}=nothing) where TT<:NNTree
+                            dims::Union{Nothing,Integer}=nothing) where {TT<:NNTree}
     dims = deprecated_dims(dims)
     dims in (1, 2) || throw(ArgumentError("dims should be 1 or 2 (got $dims)"))
     n = size(a, dims)
+    k+1 == n  && return pairwise(tree.metric, a; dims=dims)
+    k+1 > n && throw(ArgumentError("k must be smaller or equal to number of data points."))
     T = result_type(tree.metric, a, a)
     D = SparseDistanceMatrix(n, T)
-    idxs, dists = knn(tree, a, k+1, true)
+    #idxs, dists = knn(tree, a, k+1, true)
     if dims == 1
         _pairwise!(D, tree, transpose(a), k)
     else
