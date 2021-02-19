@@ -1,7 +1,7 @@
 name = "SparseDistanceMatrices"
 uuid = "c35bc376-98af-4f18-970a-3261806bc387"
 authors = ["ymtoo <ymtoo86@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
